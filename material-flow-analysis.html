@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>แบบฟอร์มการวิเคราะห์การไหลของวัสดุ (MFA)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --accent: #185FA5;
+    --accent-light: #E6F1FB;
+    --accent-text: #0C447C;
+    --bg: #F8F9FA;
+    --surface: #ffffff;
+    --border: rgba(0,0,0,0.12);
+    --border-md: rgba(0,0,0,0.22);
+    --text-primary: #1a1a1a;
+    --text-secondary: #5f6368;
+    --text-hint: #9aa0a6;
+    --radius: 8px;
+    --radius-lg: 12px;
+    --green: #1D9E75;
+    --amber: #BA7517;
+    --red: #A32D2D;
+  }
+
+  body {
+    font-family: 'Sarabun', sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  .page-wrap {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+  }
+
+  /* Header */
+  .page-header {
+    border-left: 4px solid var(--accent);
+    padding-left: 1.25rem;
+    margin-bottom: 2.5rem;
+  }
+  .page-header h1 {
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+  .page-header p {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-top: 3px;
+  }
+
+  /* Card */
+  .card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .section-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent-text);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin-bottom: 1.1rem;
+    padding-bottom: 8px;
+    border-bottom: 0.5px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .section-title svg { flex-shrink: 0; }
+
+  /* Fields */
+  .field-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field label { font-size: 13px; color: var(--text-secondary); font-weight: 500; }
+  .field input, .field select, .field textarea {
+    font-family: 'Sarabun', sans-serif;
+    font-size: 14px;
+    color: var(--text-primary);
+    background: var(--surface);
+    border: 1px solid var(--border-md);
+    border-radius: var(--radius);
+    padding: 8px 12px;
+    width: 100%;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(24,95,165,0.12);
+  }
+  .field textarea { resize: vertical; min-height: 68px; }
+  .field input[readonly] {
+    background: #f0f4f8;
+    color: var(--text-secondary);
+    cursor: default;
+  }
+
+  /* Table */
+  .table-wrap { overflow-x: auto; }
+  .flow-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    min-width: 560px;
+  }
+  .flow-table thead tr { background: #f0f4f8; }
+  .flow-table th {
+    padding: 9px 10px;
+    text-align: left;
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-size: 12px;
+    border-bottom: 1px solid var(--border-md);
+    white-space: nowrap;
+  }
+  .flow-table td {
+    padding: 5px 4px;
+    border-bottom: 0.5px solid var(--border);
+    vertical-align: middle;
+  }
+  .flow-table td input, .flow-table td select {
+    font-family: 'Sarabun', sans-serif;
+    font-size: 13px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 5px 8px;
+    width: 100%;
+    background: var(--surface);
+    color: var(--text-primary);
+    transition: border-color 0.15s;
+  }
+  .flow-table td input:focus, .flow-table td select:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+  .td-num { width: 36px; text-align: center; color: var(--text-hint); font-size: 12px; }
+
+  .add-row-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'Sarabun', sans-serif;
+    font-size: 13px;
+    color: var(--accent-text);
+    background: var(--accent-light);
+    border: 1px solid #B5D4F4;
+    border-radius: var(--radius);
+    padding: 6px 14px;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background 0.15s;
+  }
+  .add-row-btn:hover { background: #B5D4F4; }
+
+  /* Summary */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+  @media (max-width: 600px) { .summary-grid { grid-template-columns: repeat(2,1fr); } }
+  .sum-card {
+    background: #f0f4f8;
+    border-radius: var(--radius);
+    padding: 14px;
+  }
+  .sum-label { font-size: 12px; color: var(--text-secondary); margin-bottom: 4px; }
+  .sum-value { font-size: 22px; font-weight: 600; color: var(--text-primary); }
+  .sum-unit { font-size: 11px; color: var(--text-hint); }
+
+  /* Balance bar */
+  .balance-bar {
+    height: 12px;
+    border-radius: 6px;
+    overflow: hidden;
+    display: flex;
+    gap: 2px;
+    background: #e8eaed;
+    margin-top: 14px;
+  }
+  .bar-input  { height: 100%; background: #378ADD; border-radius: 3px; transition: width 0.4s; }
+  .bar-output { height: 100%; background: #1D9E75; border-radius: 3px; transition: width 0.4s; }
+  .bar-stock  { height: 100%; background: #BA7517; border-radius: 3px; transition: width 0.4s; }
+  .legend-row { display: flex; gap: 16px; margin-top: 8px; flex-wrap: wrap; }
+  .legend-dot { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: var(--text-secondary); }
+  .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+
+  .balance-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 20px;
+    margin-top: 10px;
+  }
+  .bal-ok   { background: #EAF3DE; color: #3B6D11; }
+  .bal-warn { background: #FAEEDA; color: #854F0B; }
+  .bal-err  { background: #FCEBEB; color: #A32D2D; }
+
+  /* KPI */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+  }
+  .kpi-card {
+    background: #f8f9fa;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px;
+    text-align: center;
+  }
+  .kpi-label { font-size: 12px; color: var(--text-secondary); }
+  .kpi-value { font-size: 28px; font-weight: 600; margin: 4px 0 2px; }
+  .kpi-unit  { font-size: 11px; color: var(--text-hint); }
+
+  /* Buttons */
+  .action-bar {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 1.5rem;
+    flex-wrap: wrap;
+  }
+  .btn {
+    font-family: 'Sarabun', sans-serif;
+    font-size: 14px;
+    padding: 10px 22px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.15s;
+  }
+  .btn-outline {
+    background: transparent;
+    border: 1px solid var(--border-md);
+    color: var(--text-secondary);
+  }
+  .btn-outline:hover { background: #f0f4f8; border-color: var(--accent); color: var(--accent); }
+  .btn-primary {
+    background: var(--accent);
+    border: none;
+    color: white;
+  }
+  .btn-primary:hover { background: var(--accent-text); }
+
+  /* Print */
+  @media print {
+    body { background: white; }
+    .page-wrap { padding: 1rem; }
+    .action-bar { display: none; }
+    .add-row-btn { display: none; }
+    .card { box-shadow: none; border: 1px solid #ccc; }
+    .flow-table td input, .flow-table td select { border: none; }
+  }
+</style>
+</head>
+<body>
+<div class="page-wrap">
+
+  <div class="page-header">
+    <h1>แบบฟอร์มการวิเคราะห์การไหลของวัสดุ</h1>
+    <p>Material Flow Analysis (MFA) — บันทึกและวิเคราะห์การเคลื่อนที่ของวัสดุในระบบ</p>
+  </div>
+
+  <!-- 1. ข้อมูลทั่วไป -->
+  <div class="card">
+    <div class="section-title">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="2" width="6" height="4" rx="1"/><path d="M7 4H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2"/></svg>
+      ข้อมูลทั่วไป
+    </div>
+    <div class="field-grid">
+      <div class="field">
+        <label>ชื่อโครงการ / ระบบ</label>
+        <input type="text" placeholder="เช่น โรงงานผลิต A">
+      </div>
+      <div class="field">
+        <label>ผู้วิเคราะห์</label>
+        <input type="text" placeholder="ชื่อ-นามสกุล">
+      </div>
+    </div>
+    <div class="field-grid">
+      <div class="field">
+        <label>ช่วงเวลาวิเคราะห์ (เริ่ม)</label>
+        <input type="date">
+      </div>
+      <div class="field">
+        <label>ช่วงเวลาวิเคราะห์ (สิ้นสุด)</label>
+        <input type="date">
+      </div>
+      <div class="field">
+        <label>หน่วยวัด</label>
+        <select id="unit-select" onchange="recalc()">
+          <option>กิโลกรัม (kg)</option>
+          <option>ตัน (t)</option>
+          <option>ลิตร (L)</option>
+          <option>ลูกบาศก์เมตร (m³)</option>
+          <option>หน่วย (unit)</option>
+        </select>
+      </div>
+    </div>
+    <div class="field">
+      <label>ขอบเขตของระบบ (System Boundary)</label>
+      <textarea placeholder="ระบุขอบเขตที่ศึกษา เช่น กระบวนการผลิต ตั้งแต่รับวัตถุดิบจนถึงสินค้าสำเร็จรูป"></textarea>
+    </div>
+  </div>
+
+  <!-- 2. วัสดุขาเข้า -->
+  <div class="card">
+    <div class="section-title" style="color:#0C447C">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M15 6l6 6-6 6"/></svg>
+      วัสดุขาเข้า (Input Flows)
+    </div>
+    <div class="table-wrap">
+      <table class="flow-table">
+        <thead>
+          <tr>
+            <th class="td-num">#</th>
+            <th style="min-width:140px">ชื่อวัสดุ</th>
+            <th style="min-width:110px">ประเภท</th>
+            <th style="min-width:90px">ปริมาณ</th>
+            <th style="min-width:110px">แหล่งที่มา</th>
+            <th style="min-width:100px">หมายเหตุ</th>
+          </tr>
+        </thead>
+        <tbody id="input-tbody">
+          <tr>
+            <td class="td-num">1</td>
+            <td><input type="text" placeholder="ชื่อวัสดุ"></td>
+            <td><select><option>วัตถุดิบ</option><option>น้ำ</option><option>พลังงาน</option><option>สารเคมี</option><option>บรรจุภัณฑ์</option><option>อื่นๆ</option></select></td>
+            <td><input type="number" class="input-qty" placeholder="0.00" step="0.01" min="0" oninput="recalc()"></td>
+            <td><input type="text" placeholder="ผู้จัดจำหน่าย"></td>
+            <td><input type="text" placeholder="-"></td>
+          </tr>
+          <tr>
+            <td class="td-num">2</td>
+            <td><input type="text" placeholder="ชื่อวัสดุ"></td>
+            <td><select><option>วัตถุดิบ</option><option>น้ำ</option><option>พลังงาน</option><option>สารเคมี</option><option>บรรจุภัณฑ์</option><option>อื่นๆ</option></select></td>
+            <td><input type="number" class="input-qty" placeholder="0.00" step="0.01" min="0" oninput="recalc()"></td>
+            <td><input type="text" placeholder="ผู้จัดจำหน่าย"></td>
+            <td><input type="text" placeholder="-"></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <button class="add-row-btn" onclick="addRow('input-tbody','input-qty',true)">+ เพิ่มแถว</button>
+  </div>
+
+  <!-- 3. วัสดุขาออก -->
+  <div class="card">
+    <div class="section-title" style="color:#085041">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M9 18l-6-6 6-6"/></svg>
+      วัสดุขาออก (Output Flows)
+    </div>
+    <div class="table-wrap">
+      <table class="flow-table">
+        <thead>
+          <tr>
+            <th class="td-num">#</th>
+            <th style="min-width:140px">ชื่อวัสดุ / ผลิตภัณฑ์</th>
+            <th style="min-width:110px">ประเภท</th>
+            <th style="min-width:90px">ปริมาณ</th>
+            <th style="min-width:110px">ปลายทาง</th>
+            <th style="min-width:100px">หมายเหตุ</th>
+          </tr>
+        </thead>
+        <tbody id="output-tbody">
+          <tr>
+            <td class="td-num">1</td>
+            <td><input type="text" placeholder="ชื่อผลิตภัณฑ์"></td>
+            <td><select><option>ผลิตภัณฑ์หลัก</option><option>ผลพลอยได้</option><option>ของเสีย</option><option>น้ำเสีย</option><option>ก๊าซเสีย</option><option>อื่นๆ</option></select></td>
+            <td><input type="number" class="output-qty" placeholder="0.00" step="0.01" min="0" oninput="recalc()"></td>
+            <td><input type="text" placeholder="ลูกค้า / กำจัด"></td>
+            <td><input type="text" placeholder="-"></td>
+          </tr>
+          <tr>
+            <td class="td-num">2</td>
+            <td><input type="text" placeholder="ชื่อผลิตภัณฑ์"></td>
+            <td><select><option>ผลิตภัณฑ์หลัก</option><option>ผลพลอยได้</option><option>ของเสีย</option><option>น้ำเสีย</option><option>ก๊าซเสีย</option><option>อื่นๆ</option></select></td>
+            <td><input type="number" class="output-qty" placeholder="0.00" step="0.01" min="0" oninput="recalc()"></td>
+            <td><input type="text" placeholder="ลูกค้า / กำจัด"></td>
+            <td><input type="text" placeholder="-"></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <button class="add-row-btn" onclick="addRow('output-tbody','output-qty',false)">+ เพิ่มแถว</button>
+  </div>
+
+  <!-- 4. สต็อก -->
+  <div class="card">
+    <div class="section-title" style="color:#633806">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 3H8l-2 4h12z"/></svg>
+      การเปลี่ยนแปลงสต็อกในระบบ (Stock Change)
+    </div>
+    <div class="field-grid">
+      <div class="field">
+        <label>สต็อกต้นงวด</label>
+        <input type="number" id="stock-start" placeholder="0.00" step="0.01" oninput="recalc()">
+      </div>
+      <div class="field">
+        <label>สต็อกปลายงวด</label>
+        <input type="number" id="stock-end" placeholder="0.00" step="0.01" oninput="recalc()">
+      </div>
+      <div class="field">
+        <label>การเปลี่ยนแปลงสต็อก (ΔS)</label>
+        <input type="number" id="stock-delta" readonly>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. สมดุล -->
+  <div class="card">
+    <div class="section-title">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M18 9l-5 5-4-4-3 3"/></svg>
+      สรุปสมดุลมวลสาร (Mass Balance)
+    </div>
+    <div class="summary-grid">
+      <div class="sum-card">
+        <div class="sum-label">รวมขาเข้า (I)</div>
+        <div class="sum-value" id="total-input">0.00</div>
+        <div class="sum-unit" id="unit-label-1">kg</div>
+      </div>
+      <div class="sum-card">
+        <div class="sum-label">รวมขาออก (O)</div>
+        <div class="sum-value" id="total-output">0.00</div>
+        <div class="sum-unit" id="unit-label-2">kg</div>
+      </div>
+      <div class="sum-card">
+        <div class="sum-label">เปลี่ยนแปลงสต็อก (ΔS)</div>
+        <div class="sum-value" id="total-stock">0.00</div>
+        <div class="sum-unit" id="unit-label-3">kg</div>
+      </div>
+      <div class="sum-card">
+        <div class="sum-label">ความสมดุล (I − O − ΔS)</div>
+        <div class="sum-value" id="total-balance">0.00</div>
+        <div class="sum-unit">ค่าความแตกต่าง</div>
+      </div>
+    </div>
+    <div class="legend-row">
+      <span class="legend-dot"><span class="dot" style="background:#378ADD"></span>ขาเข้า</span>
+      <span class="legend-dot"><span class="dot" style="background:#1D9E75"></span>ขาออก</span>
+      <span class="legend-dot"><span class="dot" style="background:#BA7517"></span>สต็อก</span>
+    </div>
+    <div class="balance-bar">
+      <div class="bar-input"  id="bar-input"  style="width:33%"></div>
+      <div class="bar-output" id="bar-output" style="width:33%"></div>
+      <div class="bar-stock"  id="bar-stock"  style="width:34%"></div>
+    </div>
+    <div id="balance-badge"></div>
+  </div>
+
+  <!-- 6. ตัวชี้วัด -->
+  <div class="card">
+    <div class="section-title">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+      ตัวชี้วัดประสิทธิภาพ (KPIs)
+    </div>
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">ประสิทธิภาพการใช้วัสดุ</div>
+        <div class="kpi-value" id="mat-eff" style="color:#185FA5">—</div>
+        <div class="kpi-unit">%</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">อัตราของเสีย</div>
+        <div class="kpi-value" id="waste-rate" style="color:#A32D2D">—</div>
+        <div class="kpi-unit">%</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">อัตราการนำกลับมาใช้ใหม่</div>
+        <input type="number" placeholder="กรอกเอง" step="0.1" min="0" max="100" style="font-size:22px;font-weight:600;border:none;background:transparent;text-align:center;color:#1D9E75;width:100%;padding:4px 0;">
+        <div class="kpi-unit">%</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. ข้อสังเกต -->
+  <div class="card">
+    <div class="section-title">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
+      ข้อสังเกตและข้อเสนอแนะ
+    </div>
+    <div class="field">
+      <label>ข้อสังเกตจากการวิเคราะห์</label>
+      <textarea style="min-height:80px" placeholder="สรุปผลการวิเคราะห์ จุดที่ควรปรับปรุง หรือความผิดปกติที่พบ..."></textarea>
+    </div>
+    <div class="field" style="margin-top:12px">
+      <label>ข้อเสนอแนะเพื่อปรับปรุงระบบ</label>
+      <textarea style="min-height:80px" placeholder="แนวทางลดของเสีย เพิ่มประสิทธิภาพ หรือนำวัสดุกลับมาใช้ใหม่..."></textarea>
+    </div>
+  </div>
+
+  <div class="action-bar">
+    <button class="btn btn-outline" onclick="clearForm()">ล้างข้อมูล</button>
+    <button class="btn btn-outline" onclick="window.print()">พิมพ์ / Export PDF</button>
+  </div>
+
+</div>
+
+<script>
+function getSum(cls) {
+  return Array.from(document.querySelectorAll('.' + cls))
+    .reduce((s, el) => s + (parseFloat(el.value) || 0), 0);
+}
+
+function recalc() {
+  const I  = getSum('input-qty');
+  const O  = getSum('output-qty');
+  const s1 = parseFloat(document.getElementById('stock-start').value) || 0;
+  const s2 = parseFloat(document.getElementById('stock-end').value)   || 0;
+  const dS = s2 - s1;
+  const balance = I - O - dS;
+
+  document.getElementById('stock-delta').value    = dS.toFixed(2);
+  document.getElementById('total-input').textContent   = I.toFixed(2);
+  document.getElementById('total-output').textContent  = O.toFixed(2);
+  document.getElementById('total-stock').textContent   = dS.toFixed(2);
+  document.getElementById('total-balance').textContent = balance.toFixed(2);
+
+  const unitText = document.getElementById('unit-select').value.split(' ')[0];
+  ['unit-label-1','unit-label-2','unit-label-3'].forEach(id => {
+    document.getElementById(id).textContent = unitText;
+  });
+
+  const total = I + O + Math.abs(dS);
+  if (total > 0) {
+    document.getElementById('bar-input').style.width  = Math.round(I / total * 100) + '%';
+    document.getElementById('bar-output').style.width = Math.round(O / total * 100) + '%';
+    document.getElementById('bar-stock').style.width  = Math.round(Math.abs(dS) / total * 100) + '%';
+  }
+
+  const badge = document.getElementById('balance-badge');
+  if (total === 0) { badge.innerHTML = ''; return; }
+  const pct = Math.abs(balance / (I || 1) * 100);
+  if (pct < 2) {
+    badge.innerHTML = '<span class="balance-status bal-ok">✓ สมดุล — ความแตกต่างน้อยกว่า 2%</span>';
+  } else if (pct < 10) {
+    badge.innerHTML = '<span class="balance-status bal-warn">⚠ ไม่สมดุล — ตรวจสอบข้อมูล (' + pct.toFixed(1) + '%)</span>';
+  } else {
+    badge.innerHTML = '<span class="balance-status bal-err">✕ ความแตกต่างสูงมาก (' + pct.toFixed(1) + '%) — ตรวจสอบด่วน</span>';
+  }
+
+  const matEff   = I > 0 ? Math.min(100, (O / I * 100)) : 0;
+  const wasteRate = I > 0 ? Math.max(0, ((1 - O / I) * 100)) : 0;
+  document.getElementById('mat-eff').textContent   = matEff.toFixed(1) + '%';
+  document.getElementById('waste-rate').textContent = wasteRate.toFixed(1) + '%';
+}
+
+function addRow(tbodyId, qtyClass, isInput) {
+  const tbody  = document.getElementById(tbodyId);
+  const count  = tbody.rows.length + 1;
+  const types  = isInput
+    ? ['วัตถุดิบ','น้ำ','พลังงาน','สารเคมี','บรรจุภัณฑ์','อื่นๆ']
+    : ['ผลิตภัณฑ์หลัก','ผลพลอยได้','ของเสีย','น้ำเสีย','ก๊าซเสีย','อื่นๆ'];
+  const opts   = types.map(t => `<option>${t}</option>`).join('');
+  const dest   = isInput ? 'ผู้จัดจำหน่าย' : 'ลูกค้า / กำจัด';
+  const name   = isInput ? 'ชื่อวัสดุ' : 'ชื่อผลิตภัณฑ์';
+  const tr     = document.createElement('tr');
+  tr.innerHTML = `
+    <td class="td-num">${count}</td>
+    <td><input type="text" placeholder="${name}"></td>
+    <td><select>${opts}</select></td>
+    <td><input type="number" class="${qtyClass}" placeholder="0.00" step="0.01" min="0" oninput="recalc()"></td>
+    <td><input type="text" placeholder="${dest}"></td>
+    <td><input type="text" placeholder="-"></td>`;
+  tbody.appendChild(tr);
+}
+
+function clearForm() {
+  if (!confirm('ล้างข้อมูลทั้งหมด?')) return;
+  document.querySelectorAll('input:not([readonly]), textarea').forEach(el => el.value = '');
+  recalc();
+}
+</script>
+</body>
+</html>
